@@ -1,5 +1,4 @@
-#! /usr/bin/python
-#gpl v2 by dave b. (db AT (IGNORE THIS ) d1b (D-O-T) org )
+#!/usr/bin/env python
 
 import urllib
 import pycurl
@@ -8,6 +7,11 @@ import sys
 import os
 import getpass
 from lxml import html
+
+__author__ = "dave bl. db@d1b.org"
+__version__= "0.1"
+__license__= "gpl v2"
+__program__ = "mq blackboard downloader"
 
 def get_input():
 	return str (raw_input() )
@@ -108,6 +112,7 @@ def download_course_files(url_student_base_page, connection, container_link_d, f
 		the_page = get_content_from_connection(connection, url_student_base_page + dl_url_path + item_id)
 		try:
 			the_real_item_url = get_actual_file_dl_location(the_page)
+
 			the_page, headers = get_content_from_connection(connection, blackboard_base_url + the_real_item_url, True)
 			unsafe_file_name = get_file_name_from_header(headers)
 			if unsafe_file_name != "":
@@ -183,7 +188,7 @@ def write_to_a_file(data, full_file_loc):
 
 def read_from_a_file(full_file_loc,return_type ):
 	the_file = open(full_file_loc, 'r')
-	if return_type is "read":
+	if return_type == "read":
 		return_type = the_file.read()
 	else:
 		return_type = the_file.readlines()
@@ -222,7 +227,7 @@ def main(url_course_base):
 	data = ""
 
 	state = create_mq_directory(None)
-	if state is "init":
+	if state == "init":
 		conn_details = get_user_credentials_from_user_input(conn_details)
 		save_credentials_to_accounts_file(conn_details["username"], conn_details["password"], os.path.expanduser("~/.mq/b_account") )
 	#get credentials
