@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 import urllib
 import pycurl
@@ -12,6 +12,7 @@ __author__ = "dave bl. db@d1b.org"
 __version__= "0.1"
 __license__= "gpl v2"
 __program__ = "mq blackboard downloader"
+
 
 def get_input():
 	return str (raw_input() )
@@ -60,6 +61,8 @@ def get_blackboard_stuff(url_login, url_course_base, conn_details):
 	connection.perform()
 	the_page = str(string_s.getvalue())
 	dict_course_content_links = map_page_content_to_link_id(the_page)
+
+	make_folder("download", True)
 	use_connection_traverse_course_links(url_student_base_page, connection, dict_course_content_links)
 
 	#close the connection
@@ -91,8 +94,10 @@ def use_connection_traverse_course_links(url_student_base_page, connection, dict
 
 		the_page = get_content_from_connection(connection, url_student_base_page + display_url_path + item_id)
 
+
 		child_content_pages =  map_page_content_to_link_id(the_page, True)
 		if len(child_content_pages.keys() ) > 0:
+			# go through all children content pages
 			use_connection_traverse_course_links(url_student_base_page, connection, child_content_pages)
 
 		container_link_d = map_page_content_to_link_id(the_page)
@@ -121,7 +126,7 @@ def download_course_files(url_student_base_page, connection, container_link_d, f
 				safe_file_name = replace_f_name_with_safer_version(raw_name)
 			print safe_file_name
 
-			write_to_a_file(the_page, safe_folder_name + "/" + safe_file_name)
+			write_downloaded_content_to_file(the_page, safe_folder_name + "/" + safe_file_name)
 		except Exception, e:
 			pass
 
@@ -143,11 +148,14 @@ def get_actual_file_dl_location(data):
 	doc = html.fromstring(data)
 	return [str(x.text).split('"')[1] for x in doc.xpath("//script")][0]
 
-def make_folder(folder_name):
-	DL_FOLDER = "download/"
+def make_folder(folder_name, init=False):
+	DLFOLDER = "download/"
 	safe_f_name = replace_f_name_with_safer_version(folder_name)
 	try:
-		os.mkdir(dl_url_path + safe_f_name)
+		if init:
+			os.mkdir(safe_f_name)
+		else:
+			os.mkdir(DLFOLDER + safe_f_name)
 	except Exception, e:
 		print e
 
@@ -161,7 +169,7 @@ def replace_f_name_with_safer_version(name):
 	name = name.replace('"', "_")
 	name = name.replace("'", "_")
 	name = name.replace(".py", "_python")
-	name = name[0:253]
+	name = name[0:223]
 	return name
 
 def delete_cookie():
@@ -178,8 +186,13 @@ def create_mq_directory(mq_dir):
 	if not os.path.exists(mq_dir):
 		state = "init"
 		os.mkdir(mq_dir)
-		os.chmod(mq_dir, 16832)
+	os.chmod(mq_dir, 16832)
 	return state
+
+def write_downloaded_content_to_file(data, full_file_loc):
+	DLFOLDER = "download/"
+	write_to_a_file(data, DLFOLDER + full_file_loc)
+
 
 def write_to_a_file(data, full_file_loc):
 	the_file = open(full_file_loc, 'w')
