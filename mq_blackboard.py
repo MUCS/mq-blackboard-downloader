@@ -185,7 +185,7 @@ def create_mq_directory(mq_dir):
 		mq_dir = os.path.expanduser("~/.mq")
 	if not os.path.exists(mq_dir):
 		state = "init"
-		os.mkdir(mq_dir)
+		os.mkdir(mq_dir, 16832)
 	os.chmod(mq_dir, 16832)
 	return state
 
